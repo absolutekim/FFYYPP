@@ -35,6 +35,17 @@ class PostDetailDeleteView(generics.RetrieveDestroyAPIView):
         data['comments'] = comment_serializer.data  # ✅ 게시글 데이터에 댓글 추가
 
         return Response(data)
+        
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # ✅ 작성자가 아니라면 삭제 금지
+        if request.user != instance.author:
+            return Response({'error': '본인이 작성한 글만 삭제할 수 있습니다.'}, status=status.HTTP_403_FORBIDDEN)
+
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 # ✅ 댓글 생성
 @api_view(['POST'])

@@ -8,11 +8,17 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'nickname', 'password', 'password2')
+        fields = ('username', 'email', 'nickname', 'password', 'password2', 'gender', 'selected_tags')
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Passwords must match."})
+        
+        # 태그 선택 검증 (3-7개 사이)
+        selected_tags = attrs.get('selected_tags', [])
+        if selected_tags and (len(selected_tags) < 3 or len(selected_tags) > 7):
+            raise serializers.ValidationError({"selected_tags": "3개에서 7개 사이의 태그를 선택해야 합니다."})
+            
         return attrs
 
     def create(self, validated_data):

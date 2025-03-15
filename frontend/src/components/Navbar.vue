@@ -1,15 +1,80 @@
 <template>
-  <nav>
-    <ul>
-      <li><router-link to="/">홈</router-link></li>
-      <li v-if="isAuthenticated"><router-link to="/community">Community</router-link></li>
-      <li v-if="isAuthenticated"><router-link to="/flights">Flight</router-link></li> <!-- ✅ 추가됨 -->
-      <li v-if="!isAuthenticated"><router-link to="/register">Register</router-link></li>
-      <li v-if="!isAuthenticated"><router-link to="/login">Login</router-link></li>
-      <li v-if="isAuthenticated"><button @click="logout">Logout</button></li>
-    </ul>
-  </nav>
+  <v-toolbar color="#2c3e50" dark>
+    <v-toolbar-title class="text-h6 font-weight-bold">
+      <span 
+        @click="$router.push('/')" 
+        class="title-text"
+      >
+        Travel Planner
+      </span>
+    </v-toolbar-title>
+
+    <v-spacer></v-spacer>
+
+    <v-btn text to="/" class="mx-2 nav-btn">
+      <v-icon left>mdi-home</v-icon>
+      홈
+    </v-btn>
+
+    <!-- 🔹 로그인 상태일 때 -->
+    <template v-if="isAuthenticated">
+      <v-btn text to="/community" class="mx-2 nav-btn">
+        <v-icon left>mdi-account-group</v-icon>
+        커뮤니티
+      </v-btn>
+
+      <v-btn text to="/destinations" class="mx-2 nav-btn">
+        <v-icon left>mdi-map-marker</v-icon>
+        여행지
+      </v-btn>
+      
+      <v-btn text to="/most-loved" class="mx-2 nav-btn">
+        <v-icon left>mdi-heart</v-icon>
+        인기 여행지
+      </v-btn>
+
+      <v-btn text to="/recommendations" class="mx-2 nav-btn">
+        <v-icon left>mdi-star</v-icon>
+        맞춤 추천
+      </v-btn>
+
+      <v-btn text to="/flights" class="mx-2 nav-btn">
+        <v-icon left>mdi-airplane</v-icon>
+        항공편
+      </v-btn>
+
+      <v-btn text to="/planner" class="mx-2 nav-btn">
+        <v-icon left>mdi-calendar-check</v-icon>
+        여행 플래너
+      </v-btn>
+
+      <v-btn text to="/mypage" class="mx-2 nav-btn">
+        <v-icon left>mdi-account</v-icon>
+        마이페이지
+      </v-btn>
+
+      <v-btn text @click="logout" class="mx-2 nav-btn">
+        <v-icon left>mdi-logout</v-icon>
+        로그아웃
+      </v-btn>
+    </template> <!-- ✅ 여기에서 닫아야 함 -->
+
+    <!-- 🔹 비로그인 상태일 때 -->
+    <template v-else>
+      <v-btn text to="/register" class="mx-2 nav-btn">
+        <v-icon left>mdi-account-plus</v-icon>
+        회원가입
+      </v-btn>
+
+      <v-btn text to="/login" class="mx-2 nav-btn">
+        <v-icon left>mdi-login</v-icon>
+        로그인
+      </v-btn>
+    </template>
+
+  </v-toolbar>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -18,7 +83,7 @@ export default {
   name: 'AppNavbar',
   data() {
     return {
-      isAuthenticated: !!localStorage.getItem('access_token'), // ✅ 로그인 상태 확인
+      isAuthenticated: !!localStorage.getItem('access_token'),
     };
   },
   methods: {
@@ -31,13 +96,13 @@ export default {
       delete axios.defaults.headers.common['Authorization'];
 
       alert("Successfully Logged Out.");
-      this.isAuthenticated = false; // ✅ 즉시 UI 반영
+      this.isAuthenticated = false;
       this.$router.push('/login');
     }
   },
   mounted() {
-    window.addEventListener('storage', this.checkAuth); // ✅ 로그인/로그아웃 상태 실시간 업데이트
-    document.addEventListener('auth-changed', this.checkAuth); // ✅ 커스텀 이벤트 감지
+    window.addEventListener('storage', this.checkAuth);
+    document.addEventListener('auth-changed', this.checkAuth);
   },
   beforeUnmount() {
     window.removeEventListener('storage', this.checkAuth);
@@ -47,28 +112,39 @@ export default {
 </script>
 
 <style scoped>
-nav {
-  background: #333;
-  color: white;
-  padding: 20px;
+.v-toolbar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-ul {
-  display: flex;
-  list-style: none;
-  gap: 10px;
+.nav-btn {
+  text-transform: none;
+  letter-spacing: 0.5px;
+  font-weight: 400;
+  opacity: 0.9;
+  transition: opacity 0.2s;
 }
 
-a, button {
+.nav-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.title-text {
   color: white;
-  text-decoration: none;
-  background: none;
-  border: none;
   cursor: pointer;
-  font-size: 16px;
+  transition: color 0.2s;
 }
 
-a:hover, button:hover {
-  text-decoration: underline;
+.title-text:active {
+  color: #FF5252 !important;  /* 클릭시 빨간색으로 변경 */
+}
+
+/* hover 효과도 추가할 수 있습니다 */
+.title-text:hover {
+  opacity: 0.9;
+}
+
+:deep(.router-link-active) {
+  color: white !important;
 }
 </style>

@@ -7,6 +7,13 @@ import NewPostView from '@/views/NewPostView.vue';
 import EditPostView from '@/views/EditPostView.vue';
 import CommunityView from '@/views/CommunityView.vue';
 import FlightSearchView from '@/views/FlightSearchView.vue';
+import DestinationList from '@/views/DestinationList.vue';
+import DestinationDetailView from '@/views/DestinationDetailView.vue';
+import DestinationRecommend from '@/views/DestinationRecommend.vue';
+import MyPage from '@/views/MyPage.vue';
+import ProfileView from '../views/ProfileView.vue'
+import MostLoved from '../views/MostLoved.vue'
+import CreatePlanner from '@/views/CreatePlanner.vue';
 
 const routes = [
   { path: '/', component: WelcomeView },
@@ -17,6 +24,27 @@ const routes = [
   { path: '/community/new', component: NewPostView, meta: { requiresAuth: true } },
   { path: '/community/:id/edit', component: EditPostView, props: true, meta: { requiresAuth: true } },
   { path: '/flights', component: FlightSearchView },
+  { path: '/destinations', component: DestinationList },
+  { path: '/destinations/:id', component: DestinationDetailView, props: true },
+  { path: '/recommendations', component: DestinationRecommend, meta: { requiresAuth: true } },
+  { path: '/mypage', component: MyPage, meta: { requiresAuth: true } },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: ProfileView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/most-loved',
+    name: 'MostLoved',
+    component: MostLoved
+  },
+  {
+    path: '/planner',
+    name: 'Planner',
+    component: CreatePlanner,
+    meta: { requiresAuth: true }
+  },
 ];
 
 const router = createRouter({

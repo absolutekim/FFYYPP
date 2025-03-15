@@ -44,6 +44,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'community',
     'flight',
+    'destinations',
+    'mypage',
+    'planner',
 ]
 
 MIDDLEWARE = [
@@ -146,7 +149,7 @@ REST_FRAMEWORK = {
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),  # ✅ 15분 동안 유효
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),  # ✅ 1시간으로 증가
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # ✅ 7일 동안 유효
     "ROTATE_REFRESH_TOKENS": True,  # ✅ Refresh Token 사용 시 새로운 Access Token 발급
     "BLACKLIST_AFTER_ROTATION": True,  # ✅ 이전 Refresh Token은 블랙리스트 처리
@@ -158,5 +161,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8080",  # Vue.js 프론트엔드
 ]
 
-CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS"]
+CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"]
 CORS_ALLOW_HEADERS = ["*"]
+
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8080", "http://127.0.0.1:8080"]

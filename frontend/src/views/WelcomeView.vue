@@ -1,74 +1,88 @@
 <template>
-  <p></p>
-  <div class="displayBox" data-aos="fade-up">  <p class="large-text">Welcome to Travel Kim.</p></div>
+  <div class="welcome-container">
+    <v-container>
+      <v-row justify="center" align="center" class="fill-height">
+        <v-col cols="12" md="8" class="text-center">
+          <div data-aos="fade-up" class="welcome-content">
+            <h1 class="text-h2 font-weight-bold white--text mb-6">
+              Welcome to Travel Planner
+            </h1>
+            <p class="text-h5 white--text mb-8">
+              The Best Choice for Your Perfect Journey
+            </p>
+            <v-btn
+              to="/flights"
+              x-large
+              color="primary"
+              elevation="4"
+              class="mr-4"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <v-icon left>mdi-airplane</v-icon>
+              Search Flights
+            </v-btn>
+            <v-btn
+              to="/community"
+              x-large
+              color="secondary"
+              elevation="4"
+              data-aos="fade-up"
+              data-aos-delay="400"
+            >
+              <v-icon left>mdi-account-group</v-icon>
+              Explore Community
+            </v-btn>
+          </div>
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
-<style scoped>
-.large-text {
-  font-size: 50px; /* 원하는 크기로 조절 */
-  font-weight: bold; /* 글자를 두껍게 */
-  color: #333; /* 글자색 설정 */
-  margin-top: 50px; /* 50px만큼 아래로 이동 */
-}
-</style>
-
 <script>
-import axios from 'axios';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 export default {
-  data() {
-    return { message: 'Loading...' };
-  },
-  watch: {
-    '$route'() { // ✅ 페이지 이동 시마다 토큰 재확인
-      this.checkAuth();
-    },
-    isAuthenticated(newVal) {  // ✅ `oldVal` 제거
-      if (newVal) {
-        this.fetchData();
-      }
-    }
-  },
-  computed: {
-    isAuthenticated() {
-      return !!localStorage.getItem('access_token'); // ✅ 토큰 여부 확인
-    }
-  },
-  async created() {
-    await this.checkAuth();
-    await this.fetchData();
-  },
-  methods: {
-    async checkAuth() {
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        console.warn("🚨 No JWT token found! Redirecting to login...");
-        this.$router.push('/login');
-        return false;
-      }
-      console.log("✅ JWT token found:", token);
-      return true;
-    },
-    async fetchData() {
-      try {
-        const isAuthenticated = await this.checkAuth();
-        if (!isAuthenticated) return; // ✅ 인증되지 않으면 fetchData 실행 중단
-
-        const response = await axios.get('http://localhost:8000/api/welcome/', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
-        });
-
-        console.log("✅ API 요청 성공:", response.data);
-        this.message = response.data.message;
-      } catch (error) {
-        console.error('🚨 API 요청 실패:', error);
-        if (error.response && error.response.status === 401) {
-          console.warn("⚠️ JWT 토큰이 만료되었거나 유효하지 않음. 로그인 페이지로 이동합니다.");
-          localStorage.removeItem("access_token");
-          this.$router.push('/login');
-        }
-      }
-    }
+  name: 'WelcomeView',
+  mounted() {
+    AOS.init({
+      duration: 1000,
+      once: true
+    });
   }
 };
 </script>
+
+<style scoped>
+.welcome-container {
+  min-height: 100vh;
+  background-image: url('@/assets/back.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.welcome-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.welcome-content {
+  position: relative;
+  z-index: 1;
+}
+
+.fill-height {
+  min-height: 100vh;
+}
+</style>

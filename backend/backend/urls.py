@@ -29,4 +29,7 @@ urlpatterns = [
     path('api/accounts/', include('accounts.urls')),
     path('api/community/', include('community.urls')),  # ✅ community 앱의 API 경로 추가
     path('api/flights/', include('flight.urls')),  # ✅ flights API 추가
+    path('api/destinations/', include('destinations.urls')),
+    path('api/mypage/', include('mypage.urls')),
+    path('api/planner/', include('planner.urls')),  # ✅ planner 앱의 API 경로 추가
 ]

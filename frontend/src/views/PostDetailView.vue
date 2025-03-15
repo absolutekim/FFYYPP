@@ -1,29 +1,112 @@
 <template>
-  <div>
-    <h1>{{ post.title }}</h1>
-    <p>{{ post.content }}</p>
-    <p><strong>작성자:</strong> {{ post.author }}</p>
-    <p><small>작성 날짜: {{ post.created_at }}</small></p>
+  <v-container class="post-detail-container">
+    <v-row justify="center">
+      <v-col cols="12" md="8">
+        <v-card class="post-detail-card" elevation="4">
+          <!-- 게시글 제목 및 정보 -->
+          <v-card-title class="text-h4 font-weight-bold primary--text">
+            {{ post.title }}
+          </v-card-title>
 
-    <!-- 수정 및 삭제 버튼 -->
-    <div v-if="isAuthor">
-      <router-link :to="`/community/${post.id}/edit`">게시글 수정</router-link>
-      <button @click="deletePost">게시글 삭제</button>
-    </div>
+          <v-card-subtitle class="d-flex align-center">
+            <v-icon small class="mr-1">mdi-account</v-icon>
+            {{ post.author }}
+            <v-spacer></v-spacer>
+            <v-icon small class="mr-1">mdi-clock-outline</v-icon>
+            {{ formatDate(post.created_at) }}
+          </v-card-subtitle>
 
-    <!-- 댓글 목록 -->
-    <h2>댓글</h2>
-    <ul>
-      <li v-for="comment in post.comments" :key="comment.id">
-        <p><strong>{{ comment.author }}:</strong> {{ comment.content }}</p>
-        <button v-if="isCommentAuthor(comment)" @click="deleteComment(comment.id)">댓글 삭제</button>
-      </li>
-    </ul>
+          <v-divider></v-divider>
 
-    <!-- 댓글 작성 -->
-    <textarea v-model="newComment" placeholder="댓글 작성..."></textarea>
-    <button @click="addComment">댓글 추가</button>
-  </div>
+          <!-- 게시글 내용 -->
+          <v-card-text class="text-body-1">
+            {{ post.content }}
+          </v-card-text>
+
+          <!-- 수정 및 삭제 버튼 -->
+          <v-card-actions v-if="isAuthor" class="px-4">
+            <v-spacer></v-spacer>
+            <v-btn
+              color="primary"
+              text
+              @click="$router.push(`/community/${post.id}/edit`)"
+            >
+              <v-icon left>mdi-pencil</v-icon>
+              수정
+            </v-btn>
+            <v-btn
+              color="error"
+              text
+              @click="deletePost"
+            >
+              <v-icon left>mdi-delete</v-icon>
+              삭제
+            </v-btn>
+          </v-card-actions>
+
+          <v-divider></v-divider>
+
+          <!-- 댓글 섹션 -->
+          <v-card-text>
+            <div class="text-h6 font-weight-bold mb-4">
+              <v-icon left>mdi-comment</v-icon>
+              댓글
+            </div>
+
+            <!-- 댓글 목록 -->
+            <v-list>
+              <v-list-item
+                v-for="comment in post.comments"
+                :key="comment.id"
+                class="comment-item"
+              >
+                <v-list-item-content>
+                  <v-list-item-title class="d-flex align-center">
+                    <v-icon small class="mr-1">mdi-account</v-icon>
+                    {{ comment.author }}
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      v-if="isCommentAuthor(comment)"
+                      icon
+                      small
+                      color="error"
+                      @click="deleteComment(comment.id)"
+                    >
+                      <v-icon>mdi-delete</v-icon>
+                    </v-btn>
+                  </v-list-item-title>
+                  <v-list-item-subtitle class="mt-2">
+                    {{ comment.content }}
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+
+            <!-- 댓글 작성 -->
+            <v-form @submit.prevent="addComment" class="mt-4">
+              <v-textarea
+                v-model="newComment"
+                label="댓글 작성"
+                rows="3"
+                outlined
+                dense
+                hide-details
+                class="mb-2"
+                placeholder="댓글을 입력하세요..."
+              ></v-textarea>
+              <v-btn
+                color="primary"
+                type="submit"
+                :disabled="!newComment.trim()"
+              >
+                댓글 작성
+              </v-btn>
+            </v-form>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -33,42 +116,48 @@ export default {
   data() {
     return {
       post: {
-        comments: [] // ✅ 기본값을 빈 배열로 설정 (초기 로딩 시 오류 방지)
+        comments: []
       },
       newComment: '',
     };
   },
   computed: {
     isAuthor() {
-      const userId = localStorage.getItem('user_id'); // ✅ 로그인한 유저 ID 가져오기
-      return this.post.author_id === parseInt(userId); // ✅ 게시글 작성자와 비교
-    },
-    isCommentAuthor() {
-      return (comment) => {
-        const userId = localStorage.getItem('user_id'); // ✅ 로그인한 유저 ID 가져오기
-        return comment.author_id === parseInt(userId); // ✅ 댓글 작성자와 비교
-      };
+      const username = localStorage.getItem('username');
+      return this.post.author === username;
     }
   },
   async created() {
-  try {
-    const postId = this.$route.params.id;
-    const response = await axios.get(`http://localhost:8000/api/community/posts/${postId}/`);
-    this.post = response.data;
+    try {
+      const postId = this.$route.params.id;
+      const response = await axios.get(`http://localhost:8000/api/community/posts/${postId}/`);
+      this.post = response.data;
 
-    if (!this.post.comments) {
-      this.post.comments = [];
-    } else {
-      // ✅ GET 요청 경로를 posts/{post_id}/comments/all/ 로 변경
       const commentsResponse = await axios.get(`http://localhost:8000/api/community/posts/${postId}/comments/all/`);
       this.post.comments = commentsResponse.data;
+      
+      console.log('현재 로그인한 사용자:', localStorage.getItem('username'));
+      console.log('댓글 목록:', this.post.comments);
+    } catch (error) {
+      console.error("게시글 조회 실패:", error);
     }
-  } catch (error) {
-    console.error("🚨 게시글 조회 실패:", error);
-  }
-}
-,
+  },
   methods: {
+    formatDate(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    },
+    isCommentAuthor(comment) {
+      const username = localStorage.getItem('username');
+      return comment.author === username;
+    },
     async deletePost() {
       if (confirm("정말 삭제하시겠습니까?")) {
         try {
@@ -81,21 +170,20 @@ export default {
       }
     },
     async addComment() {
-  if (!this.newComment.trim()) return;
-  try {
-    await axios.post(`http://localhost:8000/api/community/posts/${this.post.id}/comments/`, {
-      content: this.newComment,
-    });
+      if (!this.newComment.trim()) return;
+      try {
+        await axios.post(`http://localhost:8000/api/community/posts/${this.post.id}/comments/`, {
+          content: this.newComment,
+        });
 
-    this.newComment = '';
+        this.newComment = '';
 
-    // ✅ 댓글 추가 후, 서버에서 다시 댓글을 가져오기
-    const commentsResponse = await axios.get(`http://localhost:8000/api/community/posts/${this.post.id}/comments/all/`);
-    this.post.comments = commentsResponse.data;
-  } catch (error) {
-    console.error("🚨 댓글 작성 실패:", error);
-  }
-},
+        const commentsResponse = await axios.get(`http://localhost:8000/api/community/posts/${this.post.id}/comments/all/`);
+        this.post.comments = commentsResponse.data;
+      } catch (error) {
+        console.error("🚨 댓글 작성 실패:", error);
+      }
+    },
     async deleteComment(commentId) {
       if (confirm("댓글을 삭제하시겠습니까?")) {
         try {
@@ -109,3 +197,59 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.post-detail-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f6f9fc 0%, #eef2f7 100%);
+  padding: 40px 0;
+}
+
+.post-detail-card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.v-card-title {
+  padding: 24px 16px;
+}
+
+.v-card-subtitle {
+  padding: 0 16px 16px;
+  color: #666;
+}
+
+.v-card-text {
+  padding: 24px 16px;
+  line-height: 1.8;
+}
+
+.comment-item {
+  border-bottom: 1px solid #eee;
+  padding: 16px 0;
+}
+
+.comment-item:last-child {
+  border-bottom: none;
+}
+
+.v-list-item-title {
+  font-weight: 500;
+  color: #333;
+}
+
+.v-list-item-subtitle {
+  color: #666;
+  white-space: pre-wrap;
+}
+
+.v-btn {
+  text-transform: none;
+  letter-spacing: 0.5px;
+}
+
+.v-textarea {
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+</style>
