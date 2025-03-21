@@ -1,13 +1,13 @@
 <template>
   <div class="destination-recommend">
     <div class="header">
-      <h1>맞춤형 여행지 추천</h1>
-      <p>회원님의 관심사와 활동에 맞는 여행지를 추천해드립니다.</p>
+      <h1>Recommendations For You</h1>
+      <p>List of Recommended Destionations as your Preferences</p>
     </div>
 
     <div v-if="isLoading" class="loading">
       <div class="spinner"></div>
-      <p>추천 여행지를 불러오는 중입니다...</p>
+      <p>Fetching Recommended List...</p>
     </div>
 
     <div v-else-if="error" class="error-container">
@@ -19,9 +19,9 @@
       <!-- 태그 그룹별 추천 -->
       <div v-if="Object.keys(tagGroupRecommendations).length > 0" class="recommendation-section">
         <div class="section-header">
-          <h2>내 관심사 기반 추천</h2>
+          <h2>Based on your Preference</h2>
           <p class="section-description">
-            회원님이 선택한 관심 태그를 기반으로 추천한 여행지입니다.
+            These are the recommended destinations based on the tag of interest you chose.
           </p>
         </div>
         
@@ -44,13 +44,13 @@
                 <p class="location">{{ getLocationString(destination) }}</p>
                 <p class="category" v-if="destination.category">{{ destination.category }}</p>
                 <div class="similarity-score">
-                  <span class="score-label">유사도:</span>
+                  <span class="score-label">Similarity:</span>
                   <div class="score-bar">
                     <div class="score-fill" :style="{ width: `${destination.similarity_score * 100}%` }"></div>
                   </div>
                   <span class="score-value">{{ Math.round(destination.similarity_score * 100) }}%</span>
                 </div>
-                <router-link :to="`/destinations/${destination.id}`" class="view-details">자세히 보기</router-link>
+                <router-link :to="`/destinations/${destination.id}`" class="view-details">View Details</router-link>
               </div>
             </div>
           </div>
@@ -60,11 +60,11 @@
       <!-- 활동 기반 추천 -->
       <div v-if="activityBasedRecommendations.length > 0" class="recommendation-section">
         <div class="section-header">
-          <h2>내 활동 기반 추천</h2>
+          <h2>Based on your Activities</h2>
           <p class="section-description">
-            회원님의 좋아요와 리뷰를 분석하여 맞춤 추천한 여행지입니다.
+            These are customized recommended destinations by analyzing your likes and reviews.
             <span v-if="activityWeight < 1" class="weight-info">
-              (활동 데이터 반영 비율: {{ Math.round(activityWeight * 100) }}%)
+              (Activity Data Reflection Rate: {{ Math.round(activityWeight * 100) }}%)
             </span>
           </p>
         </div>
@@ -84,13 +84,13 @@
               <p class="location">{{ getLocationString(destination) }}</p>
               <p class="category" v-if="destination.category">{{ destination.category }}</p>
               <div class="similarity-score">
-                <span class="score-label">유사도:</span>
+                <span class="score-label">Similarity:</span>
                 <div class="score-bar">
                   <div class="score-fill" :style="{ width: `${destination.similarity_score * 100}%` }"></div>
                 </div>
                 <span class="score-value">{{ Math.round(destination.similarity_score * 100) }}%</span>
               </div>
-              <router-link :to="`/destinations/${destination.id}`" class="view-details">자세히 보기</router-link>
+              <router-link :to="`/destinations/${destination.id}`" class="view-details">View Details</router-link>
             </div>
           </div>
         </div>
@@ -99,9 +99,9 @@
       <!-- 서브카테고리 기반 추천 -->
       <div v-if="subcategoryRecommendations.length > 0" class="recommendation-section">
         <div class="section-header">
-          <h2>서브카테고리 기반 추천</h2>
+          <h2>Based on Sub-Categories</h2>
           <p class="section-description">
-            회원님이 좋아하는 서브카테고리(Classes & Workshops, Outdoor Activities 등)를 기반으로 추천한 여행지입니다.
+            These are recommended destinations based on your favorite subcategories (classes & workshops, outdoor activities, etc.).
           </p>
         </div>
         
@@ -122,13 +122,13 @@
                 {{ Array.isArray(destination.subcategories) ? destination.subcategories[0] : destination.subcategories }}
               </p>
               <div class="similarity-score">
-                <span class="score-label">유사도:</span>
+                <span class="score-label">Similarity:</span>
                 <div class="score-bar">
                   <div class="score-fill" :style="{ width: `${destination.similarity_score * 100}%` }"></div>
                 </div>
                 <span class="score-value">{{ Math.round(destination.similarity_score * 100) }}%</span>
               </div>
-              <router-link :to="`/destinations/${destination.id}`" class="view-details">자세히 보기</router-link>
+              <router-link :to="`/destinations/${destination.id}`" class="view-details">View Details</router-link>
             </div>
           </div>
         </div>
@@ -137,9 +137,9 @@
       <!-- 서브타입 기반 추천 -->
       <div v-if="subtypeRecommendations.length > 0" class="recommendation-section">
         <div class="section-header">
-          <h2>서브타입 기반 추천</h2>
+          <h2>Based on Sub-Types</h2>
           <p class="section-description">
-            회원님이 좋아하는 서브타입(Lessons & Workshops, Cooking Classes 등)을 기반으로 추천한 여행지입니다.
+            These are recommended destinations based on your favorite subtype (Lessons & Worksops, Cooking Classes, etc.).
           </p>
         </div>
         
@@ -160,13 +160,13 @@
                 {{ Array.isArray(destination.subtypes) ? destination.subtypes[0] : destination.subtypes }}
               </p>
               <div class="similarity-score">
-                <span class="score-label">유사도:</span>
+                <span class="score-label">Similarity:</span>
                 <div class="score-bar">
                   <div class="score-fill" :style="{ width: `${destination.similarity_score * 100}%` }"></div>
                 </div>
                 <span class="score-value">{{ Math.round(destination.similarity_score * 100) }}%</span>
               </div>
-              <router-link :to="`/destinations/${destination.id}`" class="view-details">자세히 보기</router-link>
+              <router-link :to="`/destinations/${destination.id}`" class="view-details">View Details</router-link>
             </div>
           </div>
         </div>
@@ -175,9 +175,9 @@
       <!-- 국가 기반 추천 -->
       <div v-if="countryRecommendations.length > 0" class="recommendation-section">
         <div class="section-header">
-          <h2>국가 기반 추천</h2>
+          <h2>Based on Countries</h2>
           <p class="section-description">
-            회원님이 좋아하는 국가(Japan, South Korea 등)를 기반으로 추천한 여행지입니다.
+            These are recommended destinations based on your favorite countries (Japan, South Korea, etc.).
           </p>
         </div>
         
@@ -196,13 +196,85 @@
               <p class="location">{{ getLocationString(destination) }}</p>
               <p class="country" v-if="destination.country">{{ destination.country }}</p>
               <div class="similarity-score">
-                <span class="score-label">유사도:</span>
+                <span class="score-label">Similarity:</span>
                 <div class="score-bar">
                   <div class="score-fill" :style="{ width: `${destination.similarity_score * 100}%` }"></div>
                 </div>
                 <span class="score-value">{{ Math.round(destination.similarity_score * 100) }}%</span>
               </div>
-              <router-link :to="`/destinations/${destination.id}`" class="view-details">자세히 보기</router-link>
+              <router-link :to="`/destinations/${destination.id}`" class="view-details">View Details</router-link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 키워드 기반 추천 -->
+      <div v-if="keywordRecommendations.length > 0" class="recommendation-section">
+        <div class="section-header">
+          <h2>Based on your Reviews</h2>
+          <p class="section-description">
+            These are the recommended destinations based on the keywords extracted from your review.
+          </p>
+        </div>
+        
+        <div class="destinations-grid">
+          <div 
+            v-for="destination in keywordRecommendations" 
+            :key="destination.id" 
+            class="destination-card"
+          >
+            <div 
+              class="destination-image" 
+              :style="{ backgroundImage: `url(${destination.image || 'https://via.placeholder.com/300x200?text=No+Image'})` }"
+            ></div>
+            <div class="destination-info">
+              <h3>{{ destination.name }}</h3>
+              <p class="location">{{ getLocationString(destination) }}</p>
+              <p class="category" v-if="destination.category">{{ destination.category }}</p>
+              <div class="similarity-score">
+                <span class="score-label">Similarity:</span>
+                <div class="score-bar">
+                  <div class="score-fill" :style="{ width: `${destination.similarity_score * 100}%` }"></div>
+                </div>
+                <span class="score-value">{{ Math.round(destination.similarity_score * 100) }}%</span>
+              </div>
+              <router-link :to="`/destinations/${destination.id}`" class="view-details">View Details</router-link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 최근 본 여행지 기반 추천 -->
+      <div v-if="recentlyViewedRecommendations.length > 0" class="recommendation-section">
+        <div class="section-header">
+          <h2>Based on Recently-Viewed Destinations</h2>
+          <p class="section-description">
+            These are similar destinations to the ones you recently looked at.
+          </p>
+        </div>
+        
+        <div class="destinations-grid">
+          <div 
+            v-for="destination in recentlyViewedRecommendations" 
+            :key="destination.id" 
+            class="destination-card"
+          >
+            <div 
+              class="destination-image" 
+              :style="{ backgroundImage: `url(${destination.image || 'https://via.placeholder.com/300x200?text=No+Image'})` }"
+            ></div>
+            <div class="destination-info">
+              <h3>{{ destination.name }}</h3>
+              <p class="location">{{ getLocationString(destination) }}</p>
+              <p class="category" v-if="destination.category">{{ destination.category }}</p>
+              <div class="similarity-score">
+                <span class="score-label">Similarity:</span>
+                <div class="score-bar">
+                  <div class="score-fill" :style="{ width: `${destination.similarity_score * 100}%` }"></div>
+                </div>
+                <span class="score-value">{{ Math.round(destination.similarity_score * 100) }}%</span>
+              </div>
+              <router-link :to="`/destinations/${destination.id}`" class="view-details">View Details</router-link>
             </div>
           </div>
         </div>
@@ -211,9 +283,9 @@
       <!-- 인기 여행지 추천 -->
       <div v-if="popularRecommendations.length > 0" class="recommendation-section">
         <div class="section-header">
-          <h2>인기 여행지</h2>
+          <h2>Popular Destinations</h2>
           <p class="section-description">
-            많은 사용자들이 좋아하는 인기 여행지입니다.
+            These are popular destinations that many users love.
           </p>
         </div>
         
@@ -231,7 +303,7 @@
               <h3>{{ destination.name }}</h3>
               <p class="location">{{ getLocationString(destination) }}</p>
               <p class="category" v-if="destination.category">{{ destination.category }}</p>
-              <router-link :to="`/destinations/${destination.id}`" class="view-details">자세히 보기</router-link>
+              <router-link :to="`/destinations/${destination.id}`" class="view-details">View Details</router-link>
             </div>
           </div>
         </div>
@@ -239,8 +311,8 @@
 
       <!-- 추천 결과가 없는 경우 -->
       <div v-if="recommendations.length === 0" class="no-recommendations">
-        <p>아직 추천할 여행지가 없습니다. 여행지에 좋아요를 누르거나 리뷰를 작성해보세요!</p>
-        <router-link to="/destinations" class="browse-all-btn">모든 여행지 둘러보기</router-link>
+        <p>There are no travel destinations to recommend yet. Click Like or write a review for the destination!</p>
+        <router-link to="/destinations" class="browse-all-btn">Seek for Destinations</router-link>
       </div>
     </div>
   </div>
@@ -257,6 +329,8 @@ export default {
       subcategoryRecommendations: [],
       subtypeRecommendations: [],
       countryRecommendations: [],
+      keywordRecommendations: [],
+      recentlyViewedRecommendations: [],
       tagGroupRecommendations: {},
       activityWeight: 0,
       tagWeight: 1,
@@ -281,27 +355,27 @@ export default {
   methods: {
     getTagTitle(tag) {
       const tagTitles = {
-        'Fun & Games': '놀이와 게임을 찾는 당신에게!',
-        'Sights & Landmarks': '멋진 명소와 랜드마크를 찾는 당신에게!',
-        'Transportation': '교통편을 찾고 계신가요?',
-        'Traveler Resources': '여행자 리소스를 찾는 당신에게!',
-        'Zoos & Aquariums': '동물원과 수족관을 좋아하는 당신에게!',
-        'Museums': '박물관을 좋아하는 당신에게!',
-        'Nature & Parks': '자연과 공원을 좋아하는 당신에게!',
-        'Outdoor Activities': '야외 활동을 즐기는 당신에게!',
-        'Shopping': '쇼핑을 좋아하는 당신에게!',
-        'Spas & Wellness': '스파와 웰니스를 찾는 당신에게!',
-        'Nightlife': '밤문화를 즐기는 당신에게!',
-        'Food & Drink': '맛있는 음식과 음료를 찾는 당신에게!',
-        'Classes & Workshops': '클래스와 워크샵을 찾는 당신에게!',
-        'Concerts & Shows': '콘서트와 쇼를 좋아하는 당신에게!',
-        'Casinos & Gambling': '카지노와 도박을 즐기는 당신에게!',
-        'Water & Amusement Parks': '워터파크와 놀이공원을 좋아하는 당신에게!',
-        'Tours': '투어를 찾는 당신에게!',
-        'Events': '이벤트를 찾는 당신에게!'
+        'Fun & Games': 'For those looking for fun and games!',
+        'Sights & Landmarks': 'For those looking for great sights and landmarks!',
+        'Transportation': 'Looking for transportation options?',
+        'Traveler Resources': 'For those looking for traveler resources!',
+        'Zoos & Aquariums': 'For those who love zoos and aquariums!',
+        'Museums': 'For those who love museums!',
+        'Nature & Parks': 'For those who love nature and parks!',
+        'Outdoor Activities': 'For those who enjoy outdoor activities!',
+        'Shopping': 'For those who love shopping!',
+        'Spas & Wellness': 'For those looking for spas and wellness!',
+        'Nightlife': 'For those who enjoy nightlife!',
+        'Food & Drink': 'For those looking for delicious food and drinks!',
+        'Classes & Workshops': 'For those looking for classes and workshops!',
+        'Concerts & Shows': 'For those who love concerts and shows!',
+        'Casinos & Gambling': 'For those who enjoy casinos and gambling!',
+        'Water & Amusement Parks': 'For those who love water and amusement parks!',
+        'Tours': 'For those looking for tours!',
+        'Events': 'For those looking for events!'
       };
       
-      return tagTitles[tag] || `${tag}를 좋아하는 당신에게!`;
+      return tagTitles[tag] || `For those who love ${tag}!`;
     },
     getLocationString(destination) {
       const parts = [];
@@ -309,7 +383,7 @@ export default {
       if (destination.state) parts.push(destination.state);
       if (destination.country) parts.push(destination.country);
       
-      return parts.join(', ') || '위치 정보 없음';
+      return parts.join(', ') || 'No Location Information';
     },
     async fetchRecommendations() {
       try {
@@ -319,22 +393,31 @@ export default {
         this.subcategoryRecommendations = [];
         this.subtypeRecommendations = [];
         this.countryRecommendations = [];
+        this.keywordRecommendations = [];
+        this.recentlyViewedRecommendations = [];
         this.tagGroupRecommendations = {};
         
         const token = localStorage.getItem('access_token');
         if (!token) {
-          this.error = '로그인이 필요합니다.';
+          this.error = 'You must be logged in';
           this.isLoading = false;
           return;
         }
         
-        console.log('맞춤 추천 여행지 요청 중...');
+        console.log('Loading Recommendation List...');
         
-        const response = await axios.get('http://localhost:8000/api/destinations/recommend/', {
-          headers: {
-            Authorization: `Bearer ${token}`
+        // 최근 본 여행지 정보 가져오기
+        const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+        console.log('Recently Viewed Destinations', recentlyViewed);
+        
+        const response = await axios.post('http://localhost:8000/api/destinations/recommend/', 
+          { recently_viewed: recentlyViewed },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
           }
-        });
+        );
         
         console.log('추천 응답:', response.data);
         
@@ -354,6 +437,16 @@ export default {
           
           if (response.data.country_recommendations) {
             this.countryRecommendations = response.data.country_recommendations;
+          }
+          
+          // 키워드 기반 추천 결과 설정
+          if (response.data.keyword_recommendations) {
+            this.keywordRecommendations = response.data.keyword_recommendations;
+          }
+          
+          // 최근 본 여행지 기반 추천 결과 설정
+          if (response.data.recently_viewed_recommendations) {
+            this.recentlyViewedRecommendations = response.data.recently_viewed_recommendations;
           }
           
           // 태그 그룹별 추천 결과 설정

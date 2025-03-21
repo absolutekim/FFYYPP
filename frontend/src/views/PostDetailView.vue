@@ -32,7 +32,7 @@
               @click="$router.push(`/community/${post.id}/edit`)"
             >
               <v-icon left>mdi-pencil</v-icon>
-              수정
+              Modify
             </v-btn>
             <v-btn
               color="error"
@@ -40,7 +40,7 @@
               @click="deletePost"
             >
               <v-icon left>mdi-delete</v-icon>
-              삭제
+              Delete
             </v-btn>
           </v-card-actions>
 
@@ -50,7 +50,7 @@
           <v-card-text>
             <div class="text-h6 font-weight-bold mb-4">
               <v-icon left>mdi-comment</v-icon>
-              댓글
+              Comment
             </div>
 
             <!-- 댓글 목록 -->
@@ -86,20 +86,20 @@
             <v-form @submit.prevent="addComment" class="mt-4">
               <v-textarea
                 v-model="newComment"
-                label="댓글 작성"
+                label="Write Comment"
                 rows="3"
                 outlined
                 dense
                 hide-details
                 class="mb-2"
-                placeholder="댓글을 입력하세요..."
+                placeholder="Remain your Comment..."
               ></v-textarea>
               <v-btn
                 color="primary"
                 type="submit"
                 :disabled="!newComment.trim()"
               >
-                댓글 작성
+                Write Comment
               </v-btn>
             </v-form>
           </v-card-text>

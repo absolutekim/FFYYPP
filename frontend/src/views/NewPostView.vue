@@ -4,20 +4,20 @@
       <v-col cols="12" md="8">
         <v-card class="new-post-card" elevation="4">
           <v-card-title class="text-center text-h4 font-weight-bold primary--text">
-            새 게시글 작성
+            Create New Post
           </v-card-title>
 
           <v-card-text>
             <v-form @submit.prevent="createPost" ref="form">
               <v-text-field
                 v-model="title"
-                label="제목"
+                label="Title"
                 outlined
                 dense
                 required
-                :rules="[v => !!v || '제목을 입력해주세요']"
+                :rules="[v => !!v || 'Write your Title']"
                 class="mb-4"
-                placeholder="게시글 제목을 입력하세요"
+                placeholder="Please Write your Title..."
               ></v-text-field>
 
               <v-textarea
@@ -26,10 +26,10 @@
                 outlined
                 dense
                 required
-                :rules="[v => !!v || '내용을 입력해주세요']"
+                :rules="[v => !!v || 'Write your Content']"
                 rows="10"
                 class="mb-6"
-                placeholder="게시글 내용을 입력하세요"
+                placeholder="Please Write your Content..."
               ></v-textarea>
 
               <div class="d-flex justify-space-between">
@@ -39,7 +39,7 @@
                   @click="$router.push('/community')"
                 >
                   <v-icon left>mdi-arrow-left</v-icon>
-                  목록으로
+                  Back to List
                 </v-btn>
                 <v-btn
                   color="primary"
@@ -48,7 +48,7 @@
                   :disabled="!title.trim() || !content.trim()"
                 >
                   <v-icon left>mdi-check</v-icon>
-                  작성하기
+                  Upload Post
                 </v-btn>
               </div>
             </v-form>

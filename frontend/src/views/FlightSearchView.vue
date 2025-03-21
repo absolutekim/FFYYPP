@@ -4,7 +4,7 @@
       <v-col cols="12" md="6">
         <v-card class="search-box" data-aos="fade-up" elevation="10">
           <v-card-title class="text-h4 font-weight-bold">
-            ✈️ 항공권 검색
+            ✈️ Flight Search
           </v-card-title>
 
           <v-card-text>
@@ -13,8 +13,8 @@
                 <v-text-field
                   v-model="origin"
                   @input="fetchAirports('origin')"
-                  label="출발 공항"
-                  placeholder="출발지 입력"
+                  label="Departure"
+                  placeholder="Enter Departure"
                   outlined
                   dense
                   required
@@ -34,8 +34,8 @@
                 <v-text-field
                   v-model="destination"
                   @input="fetchAirports('destination')"
-                  label="도착 공항"
-                  placeholder="도착지 입력"
+                  label="Arrival"
+                  placeholder="Enter Arrival"
                   outlined
                   dense
                   required
@@ -54,7 +54,7 @@
               <div class="form-group">
                 <v-text-field
                   v-model="departureDate"
-                  label="출발 날짜"
+                  label="Departure Date"
                   type="date"
                   outlined
                   dense
@@ -72,7 +72,7 @@
                 elevation="2"
               >
                 <v-icon left>mdi-magnify</v-icon>
-                검색
+                Search
               </v-btn>
             </form>
           </v-card-text>
@@ -80,7 +80,7 @@
 
         <!-- 검색 결과 -->
         <div v-if="flights.length" class="results-container" data-aos="fade-up" data-aos-delay="200">
-          <h2 class="text-h4 font-weight-bold white--text mb-4">🔎 검색 결과</h2>
+          <h2 class="text-h4 font-weight-bold white--text mb-4">🔎 Search Result</h2>
 
           <v-card
             v-for="flight in flights"
@@ -91,12 +91,12 @@
             data-aos-delay="300"
           >
             <v-card-text class="flight-card">
-              <img :src="flight.logo" alt="항공사 로고" class="flight-logo" />
+              <img :src="flight.logo" alt="Logo" class="flight-logo" />
               <div class="flight-info">
                 <div class="text-h6">{{ flight.airline }}</div>
                 <div class="text-h5 primary--text">{{ flight.price }} {{ flight.currency }}</div>
                 <div>🛫 {{ flight.departureTime || '-' }} | 🛬 {{ flight.arrivalTime || '-' }}</div>
-                <div>⏳ 경유 횟수: {{ flight.stops !== undefined ? flight.stops : '데이터 없음' }}</div>
+                <div>⏳ Stopover: {{ flight.stops !== undefined ? flight.stops : '데이터 없음' }}</div>
               </div>
             </v-card-text>
           </v-card>
@@ -109,7 +109,7 @@
           data-aos="fade-up"
           data-aos-delay="200"
         >
-          검색된 항공편이 없습니다.
+        No flights found.
         </v-alert>
       </v-col>
     </v-row>

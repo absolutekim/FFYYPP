@@ -58,3 +58,7 @@ class PlannerListSerializer(serializers.ModelSerializer):
     def get_items_count(self, obj):
         return obj.items.count()
 
+
+
+
+

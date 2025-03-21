@@ -4,11 +4,11 @@
     
     <div v-if="isLoading" class="loading-container">
       <div class="spinner"></div>
-      <p>인기 여행지를 불러오는 중...</p>
+      <p>Fetching Popular Destinations...</p>
     </div>
     
     <div v-else-if="locations.length === 0" class="empty-state">
-      <p>표시할 여행지가 없습니다.</p>
+      <p>There are no destinations to display.</p>
     </div>
     
     <div v-else class="locations-grid">

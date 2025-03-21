@@ -10,29 +10,71 @@
             <p class="text-h5 white--text mb-8">
               The Best Choice for Your Perfect Journey
             </p>
-            <v-btn
-              to="/flights"
-              x-large
-              color="primary"
-              elevation="4"
-              class="mr-4"
-              data-aos="fade-up"
-              data-aos-delay="200"
-            >
-              <v-icon left>mdi-airplane</v-icon>
-              Search Flights
-            </v-btn>
-            <v-btn
-              to="/community"
-              x-large
-              color="secondary"
-              elevation="4"
-              data-aos="fade-up"
-              data-aos-delay="400"
-            >
-              <v-icon left>mdi-account-group</v-icon>
-              Explore Community
-            </v-btn>
+            <!-- 로그인하지 않은 사용자에게 표시할 버튼 -->
+            <div v-if="!isAuthenticated">
+              <v-btn
+                to="/login"
+                x-large
+                color="primary"
+                elevation="4"
+                class="mr-4"
+                data-aos="fade-up"
+                data-aos-delay="200"
+              >
+                <v-icon left>mdi-login</v-icon>
+                Login
+              </v-btn>
+              <v-btn
+                to="/register"
+                x-large
+                color="secondary"
+                elevation="4"
+                data-aos="fade-up"
+                data-aos-delay="400"
+              >
+                <v-icon left>mdi-account-plus</v-icon>
+                Register
+              </v-btn>
+            </div>
+            
+            <!-- 로그인한 사용자에게 표시할 버튼 -->
+            <div v-else>
+              <v-btn
+                to="/flights"
+                x-large
+                color="primary"
+                elevation="4"
+                class="mr-4"
+                data-aos="fade-up"
+                data-aos-delay="200"
+              >
+                <v-icon left>mdi-airplane</v-icon>
+                Flight Search
+              </v-btn>
+              <v-btn
+                to="/planner"
+                x-large
+                color="secondary"
+                elevation="4"
+                class="mr-4"
+                data-aos="fade-up"
+                data-aos-delay="400"
+              >
+                <v-icon left>mdi-map-marker-path</v-icon>
+                Travel Planner
+              </v-btn>
+              <v-btn
+                to="/recommendations"
+                x-large
+                color="success"
+                elevation="4"
+                data-aos="fade-up"
+                data-aos-delay="600"
+              >
+                <v-icon left>mdi-star</v-icon>
+                Recommendations for you
+              </v-btn>
+            </div>
           </div>
         </v-col>
       </v-row>
@@ -51,6 +93,11 @@ export default {
       duration: 1000,
       once: true
     });
+  },
+  computed: {
+    isAuthenticated() {
+      return !!localStorage.getItem('access_token');
+    }
   }
 };
 </script>

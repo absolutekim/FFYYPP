@@ -4,7 +4,7 @@
       <v-col cols="12" md="8">
         <v-card class="mx-auto" elevation="3">
           <v-card-title class="text-h4 font-weight-bold text-center py-6 primary white--text">
-            마이페이지
+            My Page
           </v-card-title>
 
           <v-card-text v-if="profile" class="pa-6">
@@ -34,14 +34,14 @@
                     prepend-icon="mdi-account-edit"
                     class="mr-2"
                   >
-                    프로필 수정
+                    Modify Profile
                   </v-btn>
                   <v-btn
                     color="error"
                     @click="showDeleteAccountDialog"
                     prepend-icon="mdi-account-remove"
                   >
-                    계정 삭제
+                    Delete Account
                   </v-btn>
                 </div>
 
@@ -49,7 +49,7 @@
                 <v-form v-else @submit.prevent="updateProfile">
                   <v-text-field
                     v-model="editForm.nickname"
-                    label="닉네임"
+                    label="Nickname"
                     outlined
                     dense
                     class="mb-4"
@@ -57,7 +57,7 @@
                   
                   <v-textarea
                     v-model="editForm.bio"
-                    label="소개글"
+                    label="Introduction"
                     outlined
                     auto-grow
                     rows="4"
@@ -66,7 +66,7 @@
 
                   <v-file-input
                     v-model="editForm.profile_image"
-                    label="프로필 이미지"
+                    label="Profile Image"
                     prepend-icon="mdi-camera"
                     outlined
                     dense
@@ -80,14 +80,14 @@
                     class="mr-4"
                     prepend-icon="mdi-content-save"
                   >
-                    저장
+                    Save
                   </v-btn>
                   <v-btn
                     color="grey"
                     @click="cancelEditing"
                     prepend-icon="mdi-close"
                   >
-                    취소
+                    Cancel
                   </v-btn>
                 </v-form>
               </v-col>
@@ -109,11 +109,11 @@
           <v-tabs v-model="activeTab" background-color="primary" dark>
             <v-tab value="likes">
               <v-icon left>mdi-heart</v-icon>
-              좋아요한 여행지
+              Liked Destinations
             </v-tab>
             <v-tab value="reviews">
               <v-icon left>mdi-comment</v-icon>
-              내 리뷰
+              Your Reviews
             </v-tab>
           </v-tabs>
 
@@ -140,14 +140,14 @@
         <v-dialog v-model="deleteAccountDialog" max-width="500">
           <v-card>
             <v-card-title class="text-h5 error white--text">
-              계정 삭제
+              Delete Account
             </v-card-title>
             <v-card-text class="pt-4">
-              <p class="mb-4">계정을 삭제하면 모든 데이터가 영구적으로 삭제되며 복구할 수 없습니다. 정말로 삭제하시겠습니까?</p>
+              <p class="mb-4">If you delete your account, all data will be permanently deleted and cannot be recovered. Are you sure you want to delete it?</p>
               <v-form @submit.prevent="deleteAccount">
                 <v-text-field
                   v-model="deleteAccountPassword"
-                  label="비밀번호 확인"
+                  label="Confirm Password"
                   type="password"
                   outlined
                   dense
@@ -159,10 +159,10 @@
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn color="grey" text @click="deleteAccountDialog = false">
-                취소
+                Cancel
               </v-btn>
               <v-btn color="error" @click="deleteAccount" :loading="isDeleting">
-                계정 삭제
+                Delete Account
               </v-btn>
             </v-card-actions>
           </v-card>

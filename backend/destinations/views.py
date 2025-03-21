@@ -322,7 +322,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # 여행지 추천 API
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def recommend_destinations(request):
     """사용자의 좋아요와 리뷰를 기반으로 여행지를 추천합니다."""
@@ -343,6 +343,13 @@ def recommend_destinations(request):
     total_activities = likes_count + reviews_count
     
     print(f"사용자 활동: 좋아요 {likes_count}개, 리뷰 {reviews_count}개")
+    
+    # 최근 본 여행지 정보 가져오기
+    recently_viewed = request.data.get('recently_viewed', [])
+    has_recently_viewed = len(recently_viewed) > 0
+    
+    if has_recently_viewed:
+        print(f"최근 본 여행지 수: {len(recently_viewed)}")
     
     # 좋아요한 여행지 ID 출력 (디버깅)
     liked_location_ids = [like.location.id for like in likes]
@@ -452,38 +459,14 @@ def recommend_destinations(request):
             
             # 태그 기반 추천 결과 추가
             for location, similarity in unique_tag_results[:limit]:
-                results.append({
-                    "id": location.id,
-                    "name": location.name,
-                    "description": location.description,
-                    "category": location.category,
-                    "subcategories": location.subcategories,
-                    "subtypes": location.subtypes,
-                    "image": location.image,
-                    "city": location.city,
-                    "country": location.country,
-                    "similarity_score": float(similarity),
-                    "recommendation_type": "tag"
-                })
+                results.append((location, similarity))
             
             # 태그별 그룹 결과 생성
             tag_group_recommendations = {}
             for tag, group_results in tag_groups.items():
                 tag_group_recommendations[tag] = []
                 for location, similarity in group_results:
-                    tag_group_recommendations[tag].append({
-                        "id": location.id,
-                        "name": location.name,
-                        "description": location.description,
-                        "category": location.category,
-                        "subcategories": location.subcategories,
-                        "subtypes": location.subtypes,
-                        "image": location.image,
-                        "city": location.city,
-                        "country": location.country,
-                        "similarity_score": float(similarity),
-                        "recommendation_type": "tag"
-                    })
+                    tag_group_recommendations[tag].append((location, similarity))
             
             print(f"태그 기반 추천 결과: {len(results)}개, 태그 그룹 수: {len(tag_group_recommendations)}")
     
@@ -576,14 +559,45 @@ def recommend_destinations(request):
             )
             
             # 높은 별점을 받은 여행지와 유사한 여행지의 유사도 점수 증가
+            keyword_recommendations = []  # 키워드 기반 추천 결과를 별도로 저장
             for i, (location, similarity) in enumerate(keyword_results):
                 for high_rated_loc_id in high_rated_location_ids:
                     try:
                         high_rated_loc = Location.objects.get(id=high_rated_loc_id)
-                        # 카테고리, 서브카테고리, 서브타입 중 하나라도 일치하면 유사도 증가
-                        if (location.category == high_rated_loc.category or
-                            location.subcategory == high_rated_loc.subcategory or
-                            location.subtype == high_rated_loc.subtype):
+                        
+                        # 공통 요소가 있는지 확인하는 함수
+                        def has_common_elements(list1, list2):
+                            if not list1 or not list2:
+                                return False
+                            
+                            # 문자열이면 리스트로 변환
+                            if isinstance(list1, str):
+                                try:
+                                    import json
+                                    list1 = json.loads(list1)
+                                except:
+                                    list1 = [list1]
+                            
+                            if isinstance(list2, str):
+                                try:
+                                    import json
+                                    list2 = json.loads(list2)
+                                except:
+                                    list2 = [list2]
+                            
+                            # 리스트가 아니면 리스트로 변환
+                            if not isinstance(list1, list):
+                                list1 = [list1]
+                            
+                            if not isinstance(list2, list):
+                                list2 = [list2]
+                            
+                            # 공통 요소 확인
+                            return any(item in list2 for item in list1)
+                        
+                        # 서브카테고리 또는 서브타입 중 공통 요소가 있으면 유사도 증가
+                        if (has_common_elements(location.subcategories, high_rated_loc.subcategories) or
+                            has_common_elements(location.subtypes, high_rated_loc.subtypes)):
                             # 유사도 점수 증가 (최대 0.95까지)
                             new_similarity = min(similarity + 0.2, 0.95)
                             keyword_results[i] = (location, new_similarity)
@@ -592,13 +606,12 @@ def recommend_destinations(request):
                     except Location.DoesNotExist:
                         continue
             
+            # 키워드 기반 추천 결과를 활동 기반 결과 목록에 추가
             for location, similarity in keyword_results:
-                recommendations.append({
-                    'id': location.id,
-                    'name': location.name,
-                    'similarity': similarity,
-                    'reason': '당신의 관심사와 유사한 여행지입니다.'
-                })
+                # 대신 activity_based_results에 추가
+                activity_based_results.append((location, similarity))
+                keyword_recommendations.append((location, similarity))  # 키워드 기반 추천 결과 별도 저장
+                print(f"키워드 기반 추천: {location.name}, 유사도: {similarity:.2f}")
         
         # 3.4.2 서브카테고리 기반 검색
         if liked_subcategories:
@@ -647,11 +660,9 @@ def recommend_destinations(request):
             # 상위 결과만 선택 (유사도 점수 다양화)
             subcategory_results = []
             for i, loc in enumerate(subcategory_locations[:limit]):
-                # 유사도 점수를 다양화 (0.75 ~ 0.9 사이)
-                # 약간의 무작위성 추가
+                # 유사도 점수 - 무작위성 제거
                 base_similarity = 0.75 + (i % 4) * 0.05
-                random_factor = random.uniform(-0.05, 0.05)  # -0.05 ~ 0.05 사이의 무작위 값
-                similarity = min(max(base_similarity + random_factor, 0.7), 0.95)  # 0.7 ~ 0.95 사이로 제한
+                similarity = base_similarity
                 
                 subcategory_results.append((loc, similarity))
                 print(f"서브카테고리 기반 추천: {loc.name}, 유사도: {similarity:.2f}")
@@ -686,7 +697,8 @@ def recommend_destinations(request):
                     
                     # 서브타입 일치 여부 확인
                     for subtype in top_subtypes:
-                        if subtype in loc_subtypes:
+                        # 정확한 일치 또는 부분 일치(포함) 확인
+                        if subtype in loc_subtypes or any(subtype.lower() in st.lower() for st in loc_subtypes):
                             subtype_locations.append(loc)
                             break
             
@@ -706,11 +718,9 @@ def recommend_destinations(request):
             # 상위 결과만 선택 (유사도 점수 다양화)
             subtype_results = []
             for i, loc in enumerate(subtype_locations[:limit]):
-                # 유사도 점수를 다양화 (0.7 ~ 0.85 사이)
-                # 약간의 무작위성 추가
+                # 유사도 점수 - 무작위성 제거
                 base_similarity = 0.7 + (i % 4) * 0.05
-                random_factor = random.uniform(-0.05, 0.05)  # -0.05 ~ 0.05 사이의 무작위 값
-                similarity = min(max(base_similarity + random_factor, 0.65), 0.9)  # 0.65 ~ 0.9 사이로 제한
+                similarity = base_similarity
                 
                 subtype_results.append((loc, similarity))
                 print(f"서브타입 기반 추천: {loc.name}, 유사도: {similarity:.2f}")
@@ -745,11 +755,9 @@ def recommend_destinations(request):
             # 상위 결과만 선택 (유사도 점수 다양화)
             country_results = []
             for i, loc in enumerate(country_locations_list[:limit]):
-                # 유사도 점수를 다양화 (0.65 ~ 0.8 사이)
-                # 약간의 무작위성 추가
+                # 유사도 점수 - 무작위성 제거
                 base_similarity = 0.65 + (i % 4) * 0.05
-                random_factor = random.uniform(-0.05, 0.05)  # -0.05 ~ 0.05 사이의 무작위 값
-                similarity = min(max(base_similarity + random_factor, 0.6), 0.85)  # 0.6 ~ 0.85 사이로 제한
+                similarity = base_similarity
                 
                 country_results.append((loc, similarity))
                 print(f"국가 기반 추천: {loc.name}, 유사도: {similarity:.2f}")
@@ -770,19 +778,7 @@ def recommend_destinations(request):
         
         # 활동 기반 추천 결과 저장
         for location, similarity in unique_activity_results[:limit]:
-            results.append({
-                "id": location.id,
-                "name": location.name,
-                "description": location.description,
-                "category": location.category,
-                "subcategories": location.subcategories,
-                "subtypes": location.subtypes,
-                "image": location.image,
-                "city": location.city,
-                "country": location.country,
-                "similarity_score": float(similarity),
-                "recommendation_type": "activity"
-            })
+            results.append((location, similarity))
     
     # 5. 태그 기반 추천 (기존 태그 선택 기반) - 활동이 있는 사용자를 위한 보조 추천
     if tag_weight > 0.1 and len(results) < limit and total_activities > 0:
@@ -822,19 +818,7 @@ def recommend_destinations(request):
             # 태그 기반 추천 결과 추가
             remaining_slots = limit - len(results)
             for location, similarity in unique_tag_results[:remaining_slots]:
-                results.append({
-                    "id": location.id,
-                    "name": location.name,
-                    "description": location.description,
-                    "category": location.category,
-                    "subcategories": location.subcategories,
-                    "subtypes": location.subtypes,
-                    "image": location.image,
-                    "city": location.city,
-                    "country": location.country,
-                    "similarity_score": float(similarity),
-                    "recommendation_type": "tag"
-                })
+                results.append((location, similarity))
     
     # 6. 결과가 부족한 경우 인기 여행지로 채우기
     if len(results) < limit:
@@ -856,84 +840,197 @@ def recommend_destinations(request):
         # 인기 여행지 추가
         remaining_slots = limit - len(results)
         for location in popular_locations[:remaining_slots]:
-            results.append({
-                "id": location.id,
-                "name": location.name,
-                "description": location.description,
-                "category": location.category,
-                "subcategories": location.subcategories,
-                "subtypes": location.subtypes,
-                "image": location.image,
-                "city": location.city,
-                "country": location.country,
-                "similarity_score": 0.5,  # 인기 여행지는 중간 유사도 점수 부여
-                "recommendation_type": "popular"
-            })
+            results.append((location, 0.5))  # 인기 여행지는 중간 유사도 점수 부여
     
     # 7. 서브타입 기반 추천 결과 별도 저장
     subtype_recommendations = []
     if 'subtype_results' in locals() and subtype_results:
         for location, similarity in subtype_results[:limit]:
-            subtype_recommendations.append({
-                "id": location.id,
-                "name": location.name,
-                "description": location.description,
-                "category": location.category,
-                "subcategories": location.subcategories,
-                "subtypes": location.subtypes,
-                "image": location.image,
-                "city": location.city,
-                "country": location.country,
-                "similarity_score": float(similarity),
-                "recommendation_type": "subtype"
-            })
+            subtype_recommendations.append((location, similarity))
     
     # 8. 국가 기반 추천 결과 별도 저장
     country_recommendations = []
     if 'country_results' in locals() and country_results:
         for location, similarity in country_results[:limit]:
-            country_recommendations.append({
-                "id": location.id,
-                "name": location.name,
-                "description": location.description,
-                "category": location.category,
-                "subcategories": location.subcategories,
-                "subtypes": location.subtypes,
-                "image": location.image,
-                "city": location.city,
-                "country": location.country,
-                "similarity_score": float(similarity),
-                "recommendation_type": "country"
-            })
+            country_recommendations.append((location, similarity))
     
     # 9. 서브카테고리 기반 추천 결과 별도 저장
     subcategory_recommendations = []
     if 'subcategory_results' in locals() and subcategory_results:
         for location, similarity in subcategory_results[:limit]:
-            subcategory_recommendations.append({
-                "id": location.id,
-                "name": location.name,
-                "description": location.description,
-                "category": location.category,
-                "subcategories": location.subcategories,
-                "subtypes": location.subtypes,
-                "image": location.image,
-                "city": location.city,
-                "country": location.country,
-                "similarity_score": float(similarity),
-                "recommendation_type": "subcategory"
-            })
+            subcategory_recommendations.append((location, similarity))
+            
+    # 10. 최근 본 여행지 기반 추천 결과
+    recently_viewed_recommendations = []
+    
+    if has_recently_viewed:
+        # 최근 본 여행지의 국가, 서브카테고리, 서브타입 수집
+        rv_countries = []
+        rv_subcategories = []
+        rv_subtypes = []
+        
+        for item in recently_viewed:
+            if item.get('country'):
+                rv_countries.append(item.get('country'))
+            
+            if item.get('subcategories'):
+                subcats = item.get('subcategories')
+                if isinstance(subcats, list):
+                    rv_subcategories.extend(subcats)
+                else:
+                    rv_subcategories.append(subcats)
+            
+            if item.get('subtypes'):
+                subtypes = item.get('subtypes')
+                if isinstance(subtypes, list):
+                    rv_subtypes.extend(subtypes)
+                else:
+                    rv_subtypes.append(subtypes)
+        
+        # 중복 제거
+        rv_countries = list(set(rv_countries))
+        rv_subcategories = list(set(rv_subcategories))
+        rv_subtypes = list(set(rv_subtypes))
+        
+        print(f"최근 본 여행지 국가: {rv_countries}")
+        print(f"최근 본 여행지 서브카테고리: {rv_subcategories}")
+        print(f"최근 본 여행지 서브타입: {rv_subtypes}")
+        
+        # 최근 본 여행지와 유사한 여행지 찾기
+        recently_viewed_locations = []
+        
+        # 데이터베이스 호환성 문제로 인해 모든 여행지를 가져와서 Python에서 필터링
+        all_locations = Location.objects.all()
+        
+        for loc in all_locations:
+            # 이미 좋아요한 여행지나 최근 본 여행지는 제외
+            if loc.id in liked_location_ids or any(rv['id'] == loc.id for rv in recently_viewed):
+                continue
+                
+            match_score = 0  # 유사도 점수
+            
+            # 1. 국가 일치 여부 확인
+            if loc.country and loc.country in rv_countries:
+                match_score += 0.3
+            
+            # 2. 서브카테고리 일치 여부 확인
+            if loc.subcategories:
+                loc_subcats = loc.subcategories
+                if isinstance(loc_subcats, str):
+                    try:
+                        import json
+                        loc_subcats = json.loads(loc_subcats)
+                    except:
+                        loc_subcats = [loc_subcats]
+                
+                if not isinstance(loc_subcats, list):
+                    loc_subcats = [loc_subcats]
+                
+                for subcat in rv_subcategories:
+                    if any(subcat.lower() in sc.lower() for sc in loc_subcats):
+                        match_score += 0.2
+                        break
+            
+            # 3. 서브타입 일치 여부 확인
+            if loc.subtypes:
+                loc_subtypes = loc.subtypes
+                if isinstance(loc_subtypes, str):
+                    try:
+                        import json
+                        loc_subtypes = json.loads(loc_subtypes)
+                    except:
+                        loc_subtypes = [loc_subtypes]
+                
+                if not isinstance(loc_subtypes, list):
+                    loc_subtypes = [loc_subtypes]
+                
+                for subtype in rv_subtypes:
+                    if any(subtype.lower() in st.lower() for st in loc_subtypes):
+                        match_score += 0.2
+                        break
+            
+            # 유사도 점수가 0.2 이상인 경우만 추가 (최소 하나 이상 일치)
+            if match_score >= 0.2:
+                # 유사도 점수 최대 0.7로 제한 (너무 높지 않게 설정)
+                match_score = min(match_score, 0.7)
+                recently_viewed_locations.append((loc, match_score))
+        
+        # 유사도 점수 기준으로 정렬
+        recently_viewed_locations.sort(key=lambda x: x[1], reverse=True)
+        
+        # 상위 결과 선택
+        recently_viewed_recommendations = recently_viewed_locations[:limit]
+        
+        print(f"최근 본 여행지 기반 추천 수: {len(recently_viewed_recommendations)}")
     
     print(f"최종 추천 결과: {len(results)}개")
+    
+    # Location 객체를 JSON 직렬화 가능한 딕셔너리로 변환하는 함수
+    def location_to_dict(location, similarity, recommendation_type="general"):
+        return {
+            "id": location.id,
+            "name": location.name,
+            "description": location.description,
+            "subcategories": location.subcategories,
+            "subtypes": location.subtypes,
+            "image": location.image,
+            "city": location.city,
+            "country": location.country,
+            "similarity_score": float(similarity),
+            "recommendation_type": recommendation_type
+        }
+    
+    # 결과를 JSON 직렬화 가능한 형태로 변환
+    serialized_results = []
+    for location, similarity in results:
+        # 추천 유형 결정 (간단한 추정)
+        recommendation_type = "general"
+        serialized_results.append(location_to_dict(location, similarity, recommendation_type))
+    
+    # 태그 그룹 추천 결과 직렬화
+    serialized_tag_groups = {}
+    if 'tag_group_recommendations' in locals() and tag_group_recommendations:
+        for tag, recommendations in tag_group_recommendations.items():
+            serialized_tag_groups[tag] = []
+            for location, similarity in recommendations:
+                serialized_tag_groups[tag].append(location_to_dict(location, similarity, "tag"))
+    
+    # 서브카테고리 추천 직렬화
+    serialized_subcategory_recommendations = []
+    for location, similarity in subcategory_recommendations:
+        serialized_subcategory_recommendations.append(location_to_dict(location, similarity, "subcategory"))
+    
+    # 서브타입 추천 직렬화
+    serialized_subtype_recommendations = []
+    for location, similarity in subtype_recommendations:
+        serialized_subtype_recommendations.append(location_to_dict(location, similarity, "subtype"))
+    
+    # 국가 추천 직렬화
+    serialized_country_recommendations = []
+    for location, similarity in country_recommendations:
+        serialized_country_recommendations.append(location_to_dict(location, similarity, "country"))
+    
+    # 키워드 기반 추천 직렬화
+    serialized_keyword_recommendations = []
+    if 'keyword_recommendations' in locals() and keyword_recommendations:
+        for location, similarity in keyword_recommendations:
+            serialized_keyword_recommendations.append(location_to_dict(location, similarity, "keyword"))
+    
+    # 최근 본 여행지 기반 추천 직렬화
+    serialized_recently_viewed_recommendations = []
+    for location, similarity in recently_viewed_recommendations:
+        serialized_recently_viewed_recommendations.append(location_to_dict(location, similarity, "recently_viewed"))
     
     return Response({
         "activity_weight": activity_weight,
         "tag_weight": tag_weight,
-        "results": results,
-        "subcategory_recommendations": subcategory_recommendations,
-        "subtype_recommendations": subtype_recommendations,
-        "country_recommendations": country_recommendations,
-        "tag_group_recommendations": tag_group_recommendations if 'tag_group_recommendations' in locals() else {}
+        "results": serialized_results,
+        "keyword_recommendations": serialized_keyword_recommendations,
+        "subcategory_recommendations": serialized_subcategory_recommendations,
+        "subtype_recommendations": serialized_subtype_recommendations,
+        "country_recommendations": serialized_country_recommendations,
+        "recently_viewed_recommendations": serialized_recently_viewed_recommendations,
+        "tag_group_recommendations": serialized_tag_groups
     }, status=status.HTTP_200_OK)
 
 # 사용자의 좋아요 목록 조회

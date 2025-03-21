@@ -266,6 +266,9 @@ export default {
       });
       this.destination = response.data;
       console.log('여행지 상세 정보:', this.destination);
+      
+      // 최근 본 여행지에 추가
+      this.addToRecentlyViewed(this.destination);
     } catch (err) {
       this.error = err.message;
       console.error("🚨 Failed to load data:", err);
@@ -302,6 +305,42 @@ export default {
       }
       this.isEditingReview = false;
       this.currentEditingReview = null;
+    },
+    // 최근 본 여행지에 추가하는 함수
+    addToRecentlyViewed(destination) {
+      if (!destination || !destination.id) return;
+      
+      try {
+        // localStorage에서 최근 본 여행지 가져오기
+        let recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+        
+        // 이미 있으면 삭제 (최신 정보로 업데이트하기 위해)
+        recentlyViewed = recentlyViewed.filter(item => item.id !== destination.id);
+        
+        // 최근 본 여행지 정보 객체 생성
+        const viewedInfo = {
+          id: destination.id,
+          name: destination.name,
+          country: destination.country,
+          subcategories: destination.subcategories,
+          subtypes: destination.subtypes,
+          timestamp: new Date().toISOString()
+        };
+        
+        // 배열 앞에 추가
+        recentlyViewed.unshift(viewedInfo);
+        
+        // 최대 10개만 유지
+        if (recentlyViewed.length > 10) {
+          recentlyViewed = recentlyViewed.slice(0, 10);
+        }
+        
+        // localStorage에 저장
+        localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
+        console.log('최근 본 여행지에 추가됨:', destination.name);
+      } catch (error) {
+        console.error('최근 본 여행지 저장 중 오류 발생:', error);
+      }
     }
   }
 };

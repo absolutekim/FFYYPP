@@ -1,12 +1,12 @@
 <template>
   <div>
-    <h1>게시글 수정</h1>
+    <h1>Modify Post</h1>
     <form @submit.prevent="updatePost">
-      <label>제목:</label>
+      <label>Title:</label>
       <input type="text" v-model="title" required>
-      <label>내용:</label>
+      <label>Content:</label>
       <textarea v-model="content" required></textarea>
-      <button type="submit">수정</button>
+      <button type="submit">Upload Post</button>
     </form>
   </div>
 </template>

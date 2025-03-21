@@ -1,16 +1,16 @@
 <template>
   <div class="planner-container">
-    <h1 class="page-title">여행 플래너</h1>
+    <h1 class="page-title">Travel Planner</h1>
     
     <div v-if="loadingPlanners" class="loading-container">
       <div class="spinner"></div>
-      <p>플래너 정보를 불러오는 중...</p>
+      <p>Loading Planner Info...</p>
     </div>
     
     <!-- 플래너 선택 및 생성 -->
     <div v-else class="planner-selection">
       <div v-if="userPlanners.length > 0" class="planner-list">
-        <h2>내 플래너 목록</h2>
+        <h2>Your Planner</h2>
         <div class="planner-tabs">
           <button 
             v-for="planner in userPlanners" 
@@ -22,34 +22,34 @@
             <span class="item-count">({{ planner.items_count || 0 }})</span>
           </button>
           <button @click="currentPlanner = null" class="planner-tab new-planner">
-            <i class="fas fa-plus"></i> 새 플래너
+            <i class="fas fa-plus"></i> New Planner
           </button>
         </div>
       </div>
       
       <!-- 플래너 생성 폼 -->
       <div v-if="!currentPlanner" class="create-planner-form">
-        <h2>새 플래너 만들기</h2>
+        <h2>Create New Planner</h2>
         <div class="form-group">
-          <label for="planner-title">플래너 제목</label>
+          <label for="planner-title">Planner Title</label>
           <input 
             type="text" 
             id="planner-title" 
             v-model="newPlanner.title" 
-            placeholder="예: 유럽 여행 계획"
+            placeholder="e.g. Europe Trip"
             class="form-control"
           >
         </div>
         <div class="form-group">
-          <label for="planner-description">설명 (선택사항)</label>
+          <label for="planner-description">Explanation (Optional)</label>
           <textarea 
             id="planner-description" 
             v-model="newPlanner.description" 
-            placeholder="플래너에 대한 설명을 입력하세요"
+            placeholder="Enter Explanation for Planner"
             class="form-control"
           ></textarea>
         </div>
-        <button @click="createPlanner" class="btn-primary">플래너 만들기</button>
+        <button @click="createPlanner" class="btn-primary">Create Planner</button>
       </div>
       
       <!-- 플래너 관리 화면 -->
@@ -60,10 +60,10 @@
             <p v-if="currentPlanner.description" class="planner-description">{{ currentPlanner.description }}</p>
           </div>
           <div class="planner-actions">
-            <button @click="savePlannerOrder" class="btn-primary">변경사항 저장</button>
-            <button @click="currentPlanner = null" class="btn-secondary">다른 플래너 만들기</button>
+            <button @click="savePlannerOrder" class="btn-primary">Save Changes</button>
+            <button @click="currentPlanner = null" class="btn-secondary">Create Another Planner</button>
             <button @click="deletePlanner" class="btn-danger">
-              <i class="fas fa-trash"></i> 플래너 삭제
+              <i class="fas fa-trash"></i> Delete Planner
             </button>
           </div>
         </div>
@@ -78,8 +78,8 @@
               @drop="onDrop"
             >
               <div v-if="plannerItems.length === 0" class="empty-planner">
-                <p>여행지를 이곳으로 드래그하여 플래너에 추가하세요</p>
-                <p class="small">최대 10개까지 추가할 수 있습니다</p>
+                <p>Drag your destination here to add it to your planner</p>
+                <p class="small">You can add up to 10 Destinations</p>
               </div>
               <draggable 
                 v-model="plannerItems" 
@@ -110,19 +110,19 @@
           
           <!-- 우측: 여행지 검색 및 목록 -->
           <div class="destinations-area">
-            <h3>여행지 검색</h3>
+            <h3>Search Destinations</h3>
             <div class="filter-controls">
               <div class="search-box">
                 <input 
                   type="text" 
                   v-model="searchQuery" 
-                  placeholder="여행지 검색... (2글자 이상 입력)" 
+                  placeholder="Search for Destinations... (More than 2 Words)" 
                   class="search-input"
                 >
               </div>
               <div class="country-filter" v-if="countries.length > 0">
                 <select v-model="selectedCountry" class="country-select">
-                  <option value="">모든 국가</option>
+                  <option value="">All Countries</option>
                   <option v-for="country in countries" :key="country" :value="country">
                     {{ country }}
                   </option>
@@ -132,7 +132,7 @@
             
             <div class="destinations-list">
               <div v-if="searchQuery.trim().length < 2" class="search-prompt">
-                <p>여행지를 검색하려면 2글자 이상 입력하세요</p>
+                <p>More than 2 Words to Search Destinations</p>
               </div>
               
               <div 
@@ -160,12 +160,12 @@
               </div>
               
               <div v-else-if="searchQuery.trim().length >= 2 && filteredDestinations.length === 0 && !isLoading" class="no-results">
-                <p>검색 결과가 없습니다</p>
+                <p>No Results</p>
               </div>
               
               <div v-if="isLoading" class="loading">
                 <div class="spinner"></div>
-                <p>여행지를 불러오는 중...</p>
+                <p>Loading Destinations...</p>
               </div>
             </div>
           </div>

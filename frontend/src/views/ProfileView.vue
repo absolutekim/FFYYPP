@@ -9,8 +9,8 @@
     </div>
 
     <div v-if="!isAuthenticated" class="login-required">
-      <p>프로필을 보려면 로그인이 필요합니다.</p>
-      <router-link to="/login" class="login-button">로그인하기</router-link>
+      <p>Tou must be logged in to view profile</p>
+      <router-link to="/login" class="login-button">Login</router-link>
     </div>
 
     <div v-else class="profile-content">
@@ -19,13 +19,13 @@
           @click="activeTab = 'likes'" 
           :class="['tab-button', { active: activeTab === 'likes' }]"
         >
-          <i class="fas fa-heart"></i> 좋아요한 여행지
+          <i class="fas fa-heart"></i> Liked Destinations
         </button>
         <button 
           @click="activeTab = 'reviews'" 
           :class="['tab-button', { active: activeTab === 'reviews' }]"
         >
-          <i class="fas fa-comment"></i> 내 리뷰
+          <i class="fas fa-comment"></i> Your Reviews
         </button>
       </div>
 

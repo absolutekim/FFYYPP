@@ -2,7 +2,7 @@
   <div class="search-redirect">
     <div class="loading">
       <div class="spinner"></div>
-      <p>검색 페이지로 이동 중...</p>
+      <p>Loading to Search Page...</p>
     </div>
   </div>
 </template>

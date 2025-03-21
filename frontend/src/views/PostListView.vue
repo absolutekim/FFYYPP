@@ -4,7 +4,7 @@
       <v-col cols="12" md="8">
         <v-card class="post-list-card" elevation="4">
           <v-card-title class="text-center text-h4 font-weight-bold primary--text">
-            커뮤니티 게시글
+            Community Posts
           </v-card-title>
 
           <v-card-text>
@@ -16,7 +16,7 @@
               @click="goToNewPost"
             >
               <v-icon left>mdi-plus</v-icon>
-              새 글 작성
+              Create New Post
             </v-btn>
 
             <v-list>

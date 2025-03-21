@@ -10,44 +10,44 @@
           @keyup.enter="handleSearch"
         />
         <button @click="handleSearch" class="search-button">
-          <i class="fas fa-search"></i> 검색
+          <i class="fas fa-search"></i> Search
         </button>
       </div>
       
       <div class="search-options">
         <div class="sort-container">
-          <label for="sort-select">정렬:</label>
+          <label for="sort-select">Sort by:</label>
           <select id="sort-select" v-model="sortOption" @change="handleSort" class="sort-select">
-            <option value="name">이름순</option>
-            <option value="rating">평점순</option>
-            <option value="popularity">인기순</option>
-            <option value="recent">최신순</option>
+            <option value="name">Alphabet</option>
+            <option value="rating">Score</option>
+            <option value="popularity">Popularity</option>
+            <option value="recent">Newest</option>
           </select>
         </div>
         
         <div class="filter-container">
-          <label for="category-select">카테고리:</label>
+          <label for="category-select">Category:</label>
           <select id="category-select" v-model="selectedCategory" @change="handleFilter" class="filter-select">
-            <option value="">전체</option>
+            <option value="">All</option>
             <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
           </select>
         </div>
         
         <div class="filter-container">
-          <label for="country-select">국가:</label>
+          <label for="country-select">Country:</label>
           <select id="country-select" v-model="selectedCountry" @change="handleFilter" class="filter-select">
-            <option value="">전체</option>
+            <option value="">All</option>
             <option v-for="country in countries" :key="country" :value="country">{{ country }}</option>
           </select>
         </div>
         
         <div class="limit-container">
-          <label for="result-limit">검색 결과 개수:</label>
+          <label for="result-limit">Number of Results:</label>
           <select id="result-limit" v-model="resultLimit" class="limit-select" @change="handleLimitChange">
-            <option value="20">20개</option>
-            <option value="50">50개</option>
-            <option value="100">100개</option>
-            <option value="200">200개</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
           </select>
         </div>
       </div>
@@ -55,29 +55,29 @@
 
     <div v-if="isLoading" class="loading-container">
       <div class="spinner"></div>
-      <p>여행지 정보를 불러오는 중입니다...</p>
+      <p>Loading Destination's Info...</p>
     </div>
 
     <div v-else-if="error" class="error-container">
       <p>{{ error }}</p>
-      <button @click="fetchDestinations" class="retry-button">다시 시도</button>
+      <button @click="fetchDestinations" class="retry-button">Try Again</button>
     </div>
 
     <div v-else>
       <div v-if="isSearchMode" class="search-results-header">
         <h2>
           <i class="fas fa-search"></i> 
-          "{{ searchQuery }}" 검색 결과 ({{ filteredDestinations.length }}개)
-          <span class="search-type">감정 분석 기반 검색</span>
+          "{{ searchQuery }}" Search Result ({{ filteredDestinations.length }})
+          <span class="search-type">Sentiment Analysis Search</span>
         </h2>
         <button @click="clearSearch" class="clear-search-button">
-          <i class="fas fa-times"></i> 검색 초기화
+          <i class="fas fa-times"></i> Initialize Search
         </button>
       </div>
 
       <div v-if="filteredDestinations.length === 0" class="no-results">
-        <p v-if="isSearchMode">검색 결과가 없습니다. 다른 키워드로 검색해보세요.</p>
-        <p v-else>표시할 여행지가 없습니다.</p>
+        <p v-if="isSearchMode">No search results, try searching with a different keyword.</p>
+        <p v-else>There are no destinations to display.</p>
       </div>
 
       <div v-else class="destinations-grid">
@@ -104,7 +104,7 @@
             
             <!-- 유사도 정보 추가 -->
             <div v-if="isSearchMode && destination.similarity_score" class="similarity-score">
-              <span class="score-label">유사도:</span>
+              <span class="score-label">Similarity:</span>
               <div class="score-bar">
                 <div class="score-fill" :style="{ width: `${destination.similarity_score * 100}%` }"></div>
               </div>
@@ -117,7 +117,7 @@
             
             <div class="card-actions">
               <button class="view-details-button">
-                자세히 보기 <i class="fas fa-arrow-right"></i>
+                View Details <i class="fas fa-arrow-right"></i>
               </button>
               
               <button 
@@ -125,7 +125,7 @@
                 @click.stop="addToPlanner(destination)" 
                 class="add-to-planner-button"
               >
-                <i class="fas fa-plus"></i> 플래너에 추가
+                <i class="fas fa-plus"></i> Add to Planner
               </button>
             </div>
           </div>

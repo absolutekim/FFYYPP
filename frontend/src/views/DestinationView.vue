@@ -1,6 +1,6 @@
 <template>
   <v-container class="destination-container">
-    <h1 class="page-title">여행지 탐색</h1>
+    <h1 class="page-title">Seek for Destinations</h1>
     
     <!-- NLP 검색 컴포넌트 추가 -->
     <NLPSearchBar />
